@@ -6,52 +6,20 @@ public class MoveCameraMngr : MonoBehaviour
 {
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotationSpeed;
-    [SerializeField] private float minRotationX_Angle;
-    [SerializeField] private float maxRotationX_Angle;
     private Vector3 moveVelocity;
-    private Vector3 eulerAngles;
-    private bool noclipMovement;
     private bool showMouseCursor;
 
     // Start is called before the first frame update
     void Start()
     {
-        noclipMovement = true;
         showMouseCursor = true;
     }
 
     public void MoveCamera()
     {
-        if (noclipMovement)
-        {
-            NoclipMovement();
-        }
-
-        else
-        {
-            UFO_Movement();
-        }
+        UFO_Movement();
 
         transform.position += moveVelocity * Time.deltaTime;
-    }
-
-    private void NoclipMovement()
-    {
-        Vector3 moveDir = new Vector3(Input.GetAxis("HorizontalX"), Input.GetAxis("Vertical"), Input.GetAxis("HorizontalZ"));
-
-        moveDir.x = Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.D) ? 0 : moveDir.x;
-        moveDir.y = Input.GetKey(KeyCode.Q) && Input.GetKey(KeyCode.E) ? 0 : moveDir.y;
-        moveDir.z = Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.S) ? 0 : moveDir.z;
-
-        if (moveDir.magnitude > 1)
-        {
-            moveDir.Normalize();
-        }
-
-        moveVelocity = transform.right * moveDir.x * moveSpeed;
-        moveVelocity += transform.up * moveDir.y * moveSpeed;
-        moveVelocity += transform.forward * moveDir.z * moveSpeed;
-        moveVelocity *= 0.25f;
     }
 
     private void UFO_Movement()
@@ -79,43 +47,15 @@ public class MoveCameraMngr : MonoBehaviour
         //UI_Mngr.Instance.TextSprites["TextInfo"].text = ufoForward.ToString();
     }
 
-    public void ToggleCameraMovement()
-    {
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            noclipMovement = !noclipMovement;
-        }
-    }
-
-    public void RotateCamera()
-    {
-        Vector3 rotationDir = new Vector3(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"), 0);
-
-        if (rotationDir.magnitude > 1)
-        {
-            rotationDir.Normalize();
-        }
-
-        eulerAngles += rotationSpeed * rotationDir * Time.deltaTime;
-        eulerAngles.x = Mathf.Clamp(eulerAngles.x, minRotationX_Angle, maxRotationX_Angle);
-
-        transform.eulerAngles = eulerAngles;
-    }
-
-    public void ToggleMouseCursorVisibilityEvent()
+    public void ToggleMouseCursorVisibility()
     {
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyDown(KeyCode.F1))
         {
-            ToggleMouseCursorVisibility();
+            showMouseCursor = !showMouseCursor;
+
+            Cursor.visible = showMouseCursor;
+            Cursor.lockState = showMouseCursor ? CursorLockMode.None : CursorLockMode.Locked;
         }
-    }
-
-    void ToggleMouseCursorVisibility()
-    {
-        showMouseCursor = !showMouseCursor;
-
-        Cursor.visible = showMouseCursor;
-        Cursor.lockState = showMouseCursor ? CursorLockMode.None : CursorLockMode.Locked;
     }
 
     // Update is called once per frame
@@ -129,11 +69,8 @@ public class MoveCameraMngr : MonoBehaviour
         }
 #endif
 
-        ToggleMouseCursorVisibilityEvent();
-        ToggleCameraMovement();
-
+        ToggleMouseCursorVisibility();
         MoveCamera();
-        RotateCamera();
 
         float fps = 1 / Time.deltaTime;
 

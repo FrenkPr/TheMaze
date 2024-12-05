@@ -46,6 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mazeCell: {fileID: 5960994285259849020, guid: 0748c31599604e34782e1e923fbc6ae0,
     type: 3}
-  numRows: 1
-  numCols: 2
-  nextCellOffset: 8.3
+  nextCellOffset: 30

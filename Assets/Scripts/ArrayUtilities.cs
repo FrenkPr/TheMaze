@@ -2,16 +2,28 @@ using UnityEngine;
 
 public static class ArrayUtilities
 {
-    public static void Shuffle<T>(T[] array)
+    ////we use this extension method to shuffle array elements
+    public static void Shuffle<T>(this T[] array)
     {
-        int n = array.Length;
+        T varExchange;
+        int firstRandElement = 0;
+        int secondRandElement = 0;
 
-        while (n > 1)
+        for (int i = 0; i < array.Length; i++)
         {
-            int k = Random.Range(0, n--);
-            T temp = array[n];
-            array[n] = array[k];
-            array[k] = temp;
+            firstRandElement = Random.Range(0, array.Length);
+
+            do
+            {
+                secondRandElement = Random.Range(0, array.Length);
+            }
+            while (firstRandElement == secondRandElement);
+
+            //array elements swap
+            varExchange = array[firstRandElement];
+
+            array[firstRandElement] = array[secondRandElement];
+            array[secondRandElement] = varExchange;
         }
     }
 }

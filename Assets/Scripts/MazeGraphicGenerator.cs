@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -5,17 +6,26 @@ using UnityEngine.Rendering;
 public class MazeGraphicGenerator : MonoBehaviour
 {
     [SerializeField] private GameObject mazeCell;
-    [SerializeField] private int numRows;
-    [SerializeField] private int numCols;
     [SerializeField] private float nextCellOffset;
 
     public void GenerateMaze()
     {
-        //WallSide[,] mazeWallSides = MazeGeneratorAlgorithm.GenerateRandomMazeBitmask(numRows, numCols);
+        WallSide[,] mazeWallSides = MazeGeneratorAlgorithm.GenerateRandomMazeBitmask();
+        Dictionary<string, WallSide> wallSides = new Dictionary<string, WallSide>();
 
-        for (int z = 0; z < numRows; z++)
+        wallSides["UP"] = WallSide.UP;
+        wallSides["DOWN"] = WallSide.DOWN;
+        wallSides["LEFT"] = WallSide.LEFT;
+        wallSides["RIGHT"] = WallSide.RIGHT;
+
+        Debug.Log(mazeWallSides.GetLength(1) + "x" + mazeWallSides.GetLength(0));
+
+        //we use a nested loop to iterate each maze cell.
+        //mazeWallSides.GetLength(0): maze cells per row
+        //mazeWallSides.GetLength(1): maze cells per column
+        for (int z = 0; z < mazeWallSides.GetLength(0); z++)
         {
-            for (int x = 0; x < numCols; x++)
+            for (int x = 0; x < mazeWallSides.GetLength(1); x++)
             {
                 GameObject cellSpawnedRoot = Instantiate(mazeCell, transform, false);
                 Vector3 newCellLocalPosition = cellSpawnedRoot.transform.localPosition;
@@ -25,11 +35,26 @@ public class MazeGraphicGenerator : MonoBehaviour
                 
                 cellSpawnedRoot.transform.localPosition = newCellLocalPosition;
 
-                //for (int i = cellSpawnedRoot.transform.childCount - 1; i >= 0; i--)
+                //for (int i = 0; i < cellSpawnedRoot.transform.childCount; i++)
                 //{
-                //    Debug.Log("removed from cell root, child: " + cellSpawnedRoot.transform.GetChild(i).name +
-                //        "\nindex: " + i);
-                //    cellSpawnedRoot.transform.GetChild(i).parent = transform;
+                //    WallSide cellSpawnedWallSide = wallSides[cellSpawnedRoot.transform.GetChild(i).tag];
+
+                //    //we check if the current cell wall is to destroy or not
+                //    //comparing the mazeWallSides and the cellSpawnedWallSide bits
+                //    if (((uint)mazeWallSides[z, x] & (uint)cellSpawnedWallSide) != 0)
+                //    {
+                //        //Debug.Log("current row: " + z +
+                //        //    "\ncurrent col: " + x +
+                //        //    "\ncell wall side values: " + (uint)mazeWallSides[z, x] +
+                //        //    "\ncell child wall side value: " + cellSpawnedWallSide.ToString() + ": " + (uint)cellSpawnedWallSide);
+
+                //        GameObject cellWall = cellSpawnedRoot.transform.GetChild(i).gameObject;
+
+                //        cellWall.transform.SetParent(null, true);
+                //        Destroy(cellWall);
+
+                //        i = 0;
+                //    }
                 //}
             }
         }

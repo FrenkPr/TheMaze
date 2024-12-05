@@ -22,13 +22,6 @@ public static class MazeGeneratorAlgorithm
     //- deltaY: move along the y of the cells grid
     //- currentBitmask: the bitmask that will be assigned to the current cell
     //- neighbourBitmask: the bitmask that will be assigned to the neighbour of the current cell
-    //private static Tuple<int, int, WallSide, WallSide> goUp;
-    //private static Tuple<int, int, WallSide, WallSide> goDown;
-    //private static Tuple<int, int, WallSide, WallSide> goToLeft;
-    //private static Tuple<int, int, WallSide, WallSide> goToRight;
-
-    //private static Tuple<int, int, WallSide, WallSide>[] directions;
-
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goUp;
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goDown;
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goToLeft;
@@ -48,7 +41,15 @@ public static class MazeGeneratorAlgorithm
             y = Random.Range(0, mazeNumRows);
         }
 
-        ArrayUtilities.Shuffle(directions);
+        try
+        {
+            directions.Shuffle();
+        }
+
+        catch (System.Exception)
+        {
+            return;
+        }
 
         foreach (var dir in directions)
         {
@@ -57,10 +58,18 @@ public static class MazeGeneratorAlgorithm
 
             if (!IsCellOutOfBounds(nextX, nextY) && !HasCellBeenVisited(nextX, nextY))
             {
-                cellWallSides[(int)y, (int)x] &= dir.currentBitmask;
-                cellWallSides[nextY, nextX] &= dir.neighbourBitmask;
+                cellWallSides[(int)y, (int)x] &= ~dir.currentBitmask;
+                cellWallSides[nextY, nextX] &= ~dir.neighbourBitmask;
 
-                RemoveMazeWalls(nextX, nextY);
+                try
+                {
+                    RemoveMazeWalls(nextX, nextY);
+                }
+
+                catch (System.Exception)
+                {
+                    return;
+                }
             }
         }
     }
@@ -85,18 +94,17 @@ public static class MazeGeneratorAlgorithm
         return cellWallSides[y, x] != WallSide.ALL_WALLS;
     }
 
-    public static WallSide[,] GenerateRandomMazeBitmask(int numRows, int numCols)
+
+    public static void SetMazeSize(int numRows, int numCols)
     {
         mazeNumRows = numRows;
         mazeNumCols = numCols;
+    }
 
+    public static WallSide[,] GenerateRandomMazeBitmask()
+    {
         //read declaration variables section to understand better the usage
         //of the tuple variables
-        //goUp = new Tuple<int, int, WallSide, WallSide>(0, -1, WallSide.UP, WallSide.DOWN);
-        //goDown = new Tuple<int, int, WallSide, WallSide>(0, 1, WallSide.DOWN, WallSide.UP);
-        //goToLeft = new Tuple<int, int, WallSide, WallSide>(-1, 0, WallSide.LEFT, WallSide.RIGHT);
-        //goToRight = new Tuple<int, int, WallSide, WallSide>(1, 0, WallSide.RIGHT, WallSide.LEFT);
-
         goUp = (0, -1, WallSide.UP, WallSide.DOWN);
         goDown = (0, 1, WallSide.DOWN, WallSide.UP);
         goToLeft = (-1, 0, WallSide.LEFT, WallSide.RIGHT);
@@ -113,9 +121,9 @@ public static class MazeGeneratorAlgorithm
         cellWallSides = new WallSide[mazeNumRows, mazeNumCols];
 
         //inits each cell with all walls
-        for (int y = 0; y < numRows; y++)
+        for (int y = 0; y < mazeNumRows; y++)
         {
-            for (int x = 0; x < numCols; x++)
+            for (int x = 0; x < mazeNumCols; x++)
             {
                 cellWallSides[y, x] = WallSide.ALL_WALLS;
             }
