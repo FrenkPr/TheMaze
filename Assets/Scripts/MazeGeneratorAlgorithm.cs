@@ -1,6 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 //wall side bitmask to check what type of wall to remove
+[System.Flags]
 public enum WallSide
 {
     UP = 1,    //0b0001
@@ -13,15 +16,15 @@ public enum WallSide
 public static class MazeGeneratorAlgorithm
 {
     //declaring static variables
-    private static int mazeNumRows = 0;
-    private static int mazeNumCols = 0;
+    private static int mazeNumRows = 10;
+    private static int mazeNumCols = 10;
     private static WallSide[,] cellWallSides;
 
     //tuple values:
     //- deltaX: move along the x of the cells grid
     //- deltaY: move along the y of the cells grid
-    //- currentBitmask: the bitmask that will be assigned to the current cell
-    //- neighbourBitmask: the bitmask that will be assigned to the neighbour of the current cell
+    //- currentBitmask: the bitmask that will be assigned to the current cell to remove one of its walls
+    //- neighbourBitmask: the bitmask that will be assigned to the neighbour of the current cell to remove one of its walls
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goUp;
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goDown;
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask) goToLeft;
@@ -29,51 +32,65 @@ public static class MazeGeneratorAlgorithm
 
     private static (int deltaX, int deltaY, WallSide currentBitmask, WallSide neighbourBitmask)[] directions;
 
-    private static void RemoveMazeWalls(int? x = null, int? y = null)
+
+    //here we use the DFS algorithm with Iterative implementation (with stack) to generate the maze
+
+    //Choose the initial cell, mark it as visited and push it to the stack
+    //While the stack is not empty
+    //Pop a cell from the stack and make it a current cell
+    //If the current cell has any neighbours which have not been visited
+    //Push the current cell to the stack
+    //Choose one of the unvisited neighbours
+    //Remove the wall between the current cell and the chosen cell
+    //Mark the chosen cell as visited and push it to the stack
+    private static void RemoveMazeWalls()
     {
-        if (x == null)
-        {
-            x = Random.Range(0, mazeNumCols);
-        }
+        //Choose the initial cell, mark it as visited and push it to the stack
+        int startX = Random.Range(0, mazeNumCols);
+        int startY = Random.Range(0, mazeNumRows);
 
-        if (y == null)
-        {
-            y = Random.Range(0, mazeNumRows);
-        }
+        Stack<(int x, int y)> cellsToVisit = new Stack<(int x, int y)>();
 
-        try
+        cellsToVisit.Push((startX, startY));
+
+        //While the stack is not empty
+        while (cellsToVisit.Count > 0)
         {
+            //Pop a cell from the stack and make it a current cell
+            (int x, int y) currentCell = cellsToVisit.Pop();
+
+            //here we shuffle the neighbour directions to choose
+            //a random unvisited neighbour while iterating each one of them
             directions.Shuffle();
-        }
 
-        catch (System.Exception)
-        {
-            return;
-        }
-
-        foreach (var dir in directions)
-        {
-            int nextX = (int)x + dir.deltaX;
-            int nextY = (int)y + dir.deltaY;
-
-            if (!IsCellOutOfBounds(nextX, nextY) && !HasCellBeenVisited(nextX, nextY))
+            foreach (var dir in directions)
             {
-                cellWallSides[(int)y, (int)x] &= ~dir.currentBitmask;
-                cellWallSides[nextY, nextX] &= ~dir.neighbourBitmask;
+                int nextX = currentCell.x + dir.deltaX;
+                int nextY = currentCell.y + dir.deltaY;
 
-                try
-                {
-                    RemoveMazeWalls(nextX, nextY);
-                }
+                //If the current cell has any neighbours which have not been visited
+                //Choose one of the unvisited neighbours
 
-                catch (System.Exception)
+                //if we find at least one maze cell that has not been visited and that is not out of bounds
+                if (!IsCellOutOfBounds(nextX, nextY) && !HasCellBeenVisited(nextX, nextY))
                 {
-                    return;
+                    //Push the current cell to the stack
+                    cellsToVisit.Push(currentCell);
+
+                    //Remove the wall between the current cell and the chosen cell
+                    cellWallSides[currentCell.x, currentCell.y] &= ~dir.currentBitmask;
+                    cellWallSides[nextX, nextY] &= ~dir.neighbourBitmask;
+
+                    //Mark the chosen cell as visited and push it to the stack
+                    cellsToVisit.Push((nextX, nextY));
+
+                    break;
                 }
             }
         }
     }
 
+    //checking if a cell is out of bounds
     private static bool IsCellOutOfBounds(int x, int y)
     {
         if (x < 0 || x >= mazeNumCols)
@@ -89,18 +106,20 @@ public static class MazeGeneratorAlgorithm
         return false;
     }
 
+    //checking if a cell has been visited or not via the WallSide enum
     private static bool HasCellBeenVisited(int x, int y)
     {
-        return cellWallSides[y, x] != WallSide.ALL_WALLS;
+        return !cellWallSides[x, y].HasFlag(WallSide.ALL_WALLS);
     }
 
-
+    //set the maze size on main menu scene
     public static void SetMazeSize(int numRows, int numCols)
     {
         mazeNumRows = numRows;
         mazeNumCols = numCols;
     }
 
+    //inits and generates a random maze bitmask
     public static WallSide[,] GenerateRandomMazeBitmask()
     {
         //read declaration variables section to understand better the usage
@@ -117,15 +136,18 @@ public static class MazeGeneratorAlgorithm
         directions[2] = goToLeft;
         directions[3] = goToRight;
 
+        //mazeNumCols = 10;
+        //mazeNumRows = 50;
+
         //initializing maze cells as a bidimensional array
-        cellWallSides = new WallSide[mazeNumRows, mazeNumCols];
+        cellWallSides = new WallSide[mazeNumCols, mazeNumRows];
 
         //inits each cell with all walls
         for (int y = 0; y < mazeNumRows; y++)
         {
             for (int x = 0; x < mazeNumCols; x++)
             {
-                cellWallSides[y, x] = WallSide.ALL_WALLS;
+                cellWallSides[x, y] = WallSide.ALL_WALLS;
             }
         }
 

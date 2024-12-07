@@ -33,14 +33,22 @@ public class MainMenuSettings : MonoBehaviour
         mazeNumCols = (int)numCols;
     }
 
-    //this function is called in the MainMenuScene when BTN_GenerateMaze button clicked
+    //this function is called in the MainMenuScene when BTN_GenerateMaze button is clicked
+    public void Quit()
+    {
+#if UNITY_EDITOR
+
+        UnityEditor.EditorApplication.isPlaying = false;
+
+#else
+        Application.Quit();
+#endif
+    }
+
+    //this function is called in the MainMenuScene when BTN_GenerateMaze button is clicked
     public void OnGenerateMazeButtonClicked()
     {
         MazeGeneratorAlgorithm.SetMazeSize(mazeNumRows, mazeNumCols);
-
-        WallSide[,] mazeWallSides = MazeGeneratorAlgorithm.GenerateRandomMazeBitmask();
-        Debug.Log(mazeWallSides.GetLength(1) + "x" + mazeWallSides.GetLength(0));
-
         SceneManager.LoadScene("TheMazeScene");
     }
 }

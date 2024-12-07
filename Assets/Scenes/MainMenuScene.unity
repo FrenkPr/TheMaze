@@ -677,6 +677,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2882191240712082095, guid: 42d9db836de73e44887dc62fc77757cf,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1654715255}
+    - target: {fileID: 2882191240712082095, guid: 42d9db836de73e44887dc62fc77757cf,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Quit
+      objectReference: {fileID: 0}
+    - target: {fileID: 2882191240712082095, guid: 42d9db836de73e44887dc62fc77757cf,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MainMenuSettings, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2882191240712082095, guid: 42d9db836de73e44887dc62fc77757cf,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 4168517982204322329, guid: 42d9db836de73e44887dc62fc77757cf,
         type: 3}
       propertyPath: m_AnchorMax.y
